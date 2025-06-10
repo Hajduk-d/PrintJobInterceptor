@@ -1,72 +1,62 @@
-﻿
+﻿# PrintInterceptor - Technical Documentation
 
-# Implementation
+- **Framework**: .NET 9
+- **UI Framework**: [ReactiveUI](https://www.reactiveui.net/docs/handbook/dependency-inversion/index.html) for MVVM pattern
+- **Logging**: [NLog](https://nlog-project.org/) for configurable logging
+- **Deployment**: [Velopack](https://docs.velopack.io/) for installation and updates
+- **Monitoring**: Windows WMI events
+- **Design**: [Microsoft Fluent Design 2 guidelines](https://fluent2.microsoft.design/)
 
-### Monitoring and management
-Print job monitoring is done via WMI events. I chose WMI as there is more information online about it, 
-a lot of stackoverflow posts and blog posts.
+## Implementation
 
-There is a central service that does all the monitoring, so there is only one point in code that does the creation and 
-updates of objects with WMI.
-The code for monitoring is split up in a printjob monitor for all the printjobs and a printer monitor for printers.
-Both of these extract data from WMI events and pass it to the service. The service, in turn, creates or updates the
-corresponding objects.
+### Print Monitoring System
+The application uses WMI temporary event consumers to monitor print operations. The central service architecture ensures:
+- Single point of WMI event handling
+- Centralized object creation and updates
 
-printjobs and printers can pause, resume and cancel directly by calling invoking methods on the wmi events
+**Print Job Operations:**
+- Pause/Resume/Cancel operations via direct WMI method invocation
+- Real-time status updates through event subscription
 
 ### Document Grouping Logic
-Not entirely sure how grouping of documents should work, as i could not get a single document to start 
+Not entirely sure how grouping of documents should work, as I could not get a single document to start 
 multiple print jobs. 
 
-Print jobs are assigned to a document first by checking for name and if the prin job is in a certain timeframe,
-then by checking for the owner of the print job and document.
+Documents are associated with print jobs using these criteria:
+1. **First**: Document name and time proximity to other printjobs for that Document
+2. **Seccond**: Print job owner
 
 This was tested by printing multiple test pages in a short span of time, assuming that one document creates multiple
 print jobs it would make more sense to add checks for printed pages and states of print jobs.
 
-### Logging
+## Known Limitations & Technical Debt
 
-As the logging framework, I chose [NLog](https://nlog-project.org/) as I'm already familiar with it and like its 
-customizability.
+### WMI Event Reliability
+Temporary event consumers may miss events, particularly with Microsoft Print to PDF.
+implementing [permanent event consumers](https://learn.microsoft.com/en-us/windows/win32/wmisdk/monitoring-events#using-temporary-event-consumers) 
+would fix this issue 
 
-### Installer
-
-To create the installer, I chose [Velopack](https://docs.velopack.io/) as it is straightforward to use and supports 
-features like: delta updates, auto updates, easy CI integrations
-
-
-### UI
-
-For the mvvm framework I chose [ReactiveUI](https://www.reactiveui.net/).
-
-I am already familiar with it, it has good documentation and is part of the dotnetfoundation.
-Bindings, DI, Navigation as well as Task scheduling are handled through reactive ui.
-
-The ui design is roughly based on [Micorosoft Fluent Design 2 guidelines](https://fluent2.microsoft.design/design-principles)
-
-# Possible Improvements
-
-### WMI events
-Using wmi events, especially when using Temporary
-event consumer as opposed to [Permanent](https://learn.microsoft.com/en-us/windows/win32/wmisdk/monitoring-events#using-temporary-event-consumers) consumers,
-might cause some problems with receiving every event. This happens a lot when printing via Microsoft print to PDF.
-
-### PrintTestPage method
-This method is not using WMI events but directly the printui through the run dll.
-This ensures that when using the Print to PDF (printer), the file save dialog pops up.
+### Print Test Functionality
+Print test pages bypass WMI events, using direct PrintUI calls
+This ensures that when using the Print to PDF the file save dialog pops up.
 Using WMI events, this dialog never opens, so the process cannot finish.
 
-### Print jobs & Printers
-Print jobs and Printers directly call WMI methods, this could be done through the Printerservice similarly like 
-updating print jobs but the other way around. A print job sends a request to the printerservice to pause/resume/cancel
-itself, and the printerservice would do the rest. This makes sure that there is only one part of the code 
-that handles all the WMI interactions. 
+#### Direct WMI Method Calls
+Print jobs and printers directly invoke WMI methods. 
+A better approach would be to Route all WMI interactions 
+through PrinterService to centralize WMI interaciton.
 
-### Navigation Service
-The navigation service registers every viewmodel for each print job, printer and document. This goes against 
-the best practice of using a DI for ui. The problem is that because all the viewmodels reference each other,  
-this creates circular dependencies when creating one of the viewmodels. This is also why the FinishedInit signal exists 
-in the PrintJob class. To ensure that all the references are set before passing it to the ui. 
+#### Navigation Service Design
+Registers individual ViewModels for each entity (job/printer/document) this 
+Violates DI best practices. This is a workaround 
 
-### Sidebar
-The sidebar implementation is very basic, for a more complex application the navbar should automatically get its items
+because all the viewmodels reference each other,  
+this creates circular dependencies. This is also why the `FinishedInit` signal exists,
+to ensures proper initialization order
+
+#### UI Component Limitations
+The side Sidebar implementation is very basic and is not very scalable
+
+## Note
+The codebase includes a parallel implementation using the Windows Spooler API for print job and printer management. This was developed as a comparative to check data and functionality.
+The WMI-based implementation is the primary approach, with the Spooler API implementation maintained for reference.
