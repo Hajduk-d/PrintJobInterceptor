@@ -1,0 +1,62 @@
+﻿<rxui:ReactiveUserControl
+    x:Class="PrintJobInterceptor.Desktop.Views.HomeView"
+    x:TypeArguments="viewModels:HomeViewModel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:rxui="http://reactiveui.net"
+    xmlns:viewModels="clr-namespace:PrintJobInterceptor.Desktop.ViewModels"
+    d:DataContext="{d:DesignInstance viewModels:HomeViewModel}"
+    mc:Ignorable="d">
+
+    <StackPanel Orientation="Horizontal" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+        <StackPanel Margin="50">
+            <TextBlock Text="Printers" Style="{StaticResource PanelHeadingTextBlock}"/>
+
+            <ListView  ItemsSource="{Binding PrinterVms}" SelectedItem="{Binding SelectedPrinter}"
+                       ItemTemplate="{StaticResource PrinterCardTemplate}" Width="300" MinHeight="200">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding ItemDoubleClickedCommand}"
+                                               CommandParameter="{Binding SelectedPrinter}" />                    
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListView> 
+        </StackPanel>
+        <StackPanel Margin="50">
+            <TextBlock Text="PrintJobs" Style="{StaticResource PanelHeadingTextBlock}"/>
+            <ListView ItemsSource="{Binding PrintJobVms}" SelectedItem="{Binding SelectedPrintJob}"
+                      ItemTemplate="{StaticResource PrintJobCardTemplate}"
+                      Width="300" MinHeight="200">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding ItemDoubleClickedCommand}"
+                                               CommandParameter="{Binding SelectedPrintJob}" />                    
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListView>
+        </StackPanel>
+        
+        <StackPanel Margin="50">
+            <TextBlock Text="Documents" Style="{StaticResource PanelHeadingTextBlock}"/>
+            <ListView ItemsSource="{Binding DocumentVms}" 
+                      SelectedItem="{Binding SelectedDocument}" 
+                      ItemTemplate="{StaticResource DocumentCardTemplate}"
+                      Width="300" MinHeight="200"  >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding ItemDoubleClickedCommand}"
+                                               CommandParameter="{Binding SelectedDocument}" />                    
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListView>
+        </StackPanel>
+            
+            
+    </StackPanel>
+    
+</rxui:ReactiveUserControl>

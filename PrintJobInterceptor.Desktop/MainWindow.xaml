@@ -1,0 +1,23 @@
+﻿<rxui:ReactiveWindow x:Class="PrintJobInterceptor.Desktop.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:rxui="http://reactiveui.net"
+                      xmlns:viewModels="clr-namespace:PrintJobInterceptor.Desktop.ViewModels"
+                      xmlns:views="clr-namespace:PrintJobInterceptor.Desktop.Views"
+                      Title="Print Job Interceptor"
+                      Width="1300"
+                      Height="1000"
+                      x:TypeArguments="viewModels:MainWindowViewModel"
+                      WindowStartupLocation="CenterScreen"
+                      mc:Ignorable="d"
+                      d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
+    <DockPanel LastChildFill="True"> 
+        <views:SidebarView DataContext="{Binding SidebarViewModel}" DockPanel.Dock="Left" 
+                           VerticalAlignment="Stretch"/>
+            
+        <rxui:RoutedViewHost Router="{Binding Router}"/>
+    </DockPanel>
+        
+</rxui:ReactiveWindow>

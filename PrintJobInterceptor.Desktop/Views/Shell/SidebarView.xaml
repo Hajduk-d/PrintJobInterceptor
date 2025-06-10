@@ -1,0 +1,23 @@
+﻿<rxui:ReactiveUserControl
+    x:Class="PrintJobInterceptor.Desktop.Views.SidebarView"
+    x:TypeArguments="viewModels:SidebarViewModel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rxui="http://reactiveui.net"
+    xmlns:viewModels="clr-namespace:PrintJobInterceptor.Desktop.ViewModels"
+    mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:SidebarViewModel }">
+    
+    <ListView HorizontalContentAlignment="Left"
+              ItemsSource="{Binding SidebarItemViewModels}"
+              SelectedItem="{Binding SelectedItem}">
+        <ListView.ItemTemplate>
+            <DataTemplate DataType="{x:Type viewModels:SidebarItemViewModel}">
+                <TextBlock HorizontalAlignment="Center" FontFamily="{StaticResource SymbolThemeFontFamily}" Text="{Binding Icon}"
+                           FontSize="24"
+                           ToolTip="{Binding Title}"/>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
+</rxui:ReactiveUserControl>
